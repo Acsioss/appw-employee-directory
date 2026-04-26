@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="fr" data-bs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Annuaire des Agents - Intranet</title>
+    
+    <!-- Tabler CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta20/dist/css/tabler.min.css">
+    
+    <!-- jsTree CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.16/themes/default/style.min.css">
+    
+    <!-- Select2 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css">
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<header class="navbar navbar-expand-md navbar-light" style="background: var(--tblr-bg-surface); border-bottom: 1px solid var(--tblr-border-color);">
+    <div class="container-fluid">
+        <a href="#" class="navbar-brand">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none">
+                <path d="M9 7m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0"/>
+                <path d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2"/>
+            </svg>
+            Annuaire des Agents
+        </a>
+        <div class="col-md-6 mx-auto">
+            <div class="input-group">
+                <span class="input-group-text bg-transparent">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none">
+                        <path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"/>
+                        <path d="M21 21l-6 -6"/>
+                    </svg>
+                </span>
+                <input type="text" id="global-search" class="form-control" placeholder="Rechercher un agent, un site, une entité...">
+            </div>
+        </div>
+        <button class="navbar-toggler d-md-none ms-2" type="button" data-bs-toggle="collapse" data-bs-target="#mobile-menu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+</header>
+
+<!-- Mobile menu -->
+<div class="collapse d-md-none" id="mobile-menu">
+    <div class="p-3">
+        <button class="btn btn-primary w-100 mb-2" onclick="toggleDrawer('left')">Navigations</button>
+        <button class="btn btn-outline-primary w-100" onclick="toggleDrawer('right')">Détails</button>
+    </div>
+</div>
+
+<!-- Drawers for mobile -->
+<div class="drawer-overlay" id="drawer-overlay" onclick="closeAllDrawers()"></div>
+<div class="drawer" id="left-drawer">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5>Navigations</h5>
+        <button type="button" class="btn-close" onclick="closeAllDrawers()"></button>
+    </div>
+    <div id="mobile-trees"></div>
+</div>
+<div class="drawer drawer-right" id="right-drawer">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5>Détails</h5>
+        <button type="button" class="btn-close" onclick="closeAllDrawers()"></button>
+    </div>
+    <div id="mobile-detail"></div>
+</div>
+
+<div class="main-wrapper">
+    <!-- Panneau latéral gauche -->
+    <aside class="left-panel" id="left-panel">
+        <div class="tree-container">
+            <div class="tree-header">
+                <h6 class="mb-0">Entités Organisationnelles</h6>
+                <span class="badge bg-blue-lt" id="entity-count">0</span>
+            </div>
+            <input type="text" class="form-control form-control-sm tree-search" id="entity-tree-search" placeholder="Rechercher...">
+            <div id="entity-tree"></div>
+        </div>
+        <div class="tree-container">
+            <div class="tree-header">
+                <h6 class="mb-0">Sites Départementaux</h6>
+                <span class="badge bg-green-lt" id="site-count">0</span>
+            </div>
+            <input type="text" class="form-control form-control-sm tree-search" id="site-tree-search" placeholder="Rechercher...">
+            <div id="site-tree"></div>
+        </div>
+    </aside>
+
+    <!-- Zone centrale -->
+    <main class="center-panel">
+        <section class="filters-section">
+            <div class="d-flex flex-wrap gap-2">
+                <div class="position-relative" style="min-width:200px;">
+                    <select id="filter-functions" class="form-select" multiple style="width:100%;"></select>
+                    <span class="filter-active-indicator" id="function-filter-count" style="display:none;">0</span>
+                </div>
+                <div class="position-relative" style="min-width:200px;">
+                    <select id="filter-groups" class="form-select" multiple style="width:100%;"></select>
+                    <span class="filter-active-indicator" id="group-filter-count" style="display:none;">0</span>
+                </div>
+                <div class="position-relative" style="min-width:200px;">
+                    <select id="filter-locations" class="form-select" multiple style="width:100%;"></select>
+                    <span class="filter-active-indicator" id="location-filter-count" style="display:none;">0</span>
+                </div>
+            </div>
+            <div class="d-flex justify-content-between align-items-center mt-3">
+                <div class="text-muted small" id="active-filters-info">Aucun filtre actif</div>
+                <button class="btn btn-sm btn-outline-danger" id="clear-filters" style="display:none;">Réinitialiser</button>
+            </div>
+        </section>
+
+        <section class="content-area">
+            <div class="d-flex justify-content-end gap-2 mb-3">
+                <div class="btn-group view-toggle">
+                    <button class="btn btn-outline-primary active" data-view="table">Tableau</button>
+                    <button class="btn btn-outline-primary" data-view="cards">Cartes</button>
+                    <button class="btn btn-outline-primary" data-view="map">Carte</button>
+                </div>
+                <div class="dropdown">
+                    <button class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">Export</button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#" onclick="exportData('excel'); return false;">Excel</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="exportData('pdf'); return false;">PDF</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Vue Tableau -->
+            <div id="table-view">
+                <div class="table-responsive">
+                    <table class="table table-hover table-vcenter agent-table">
+                        <thead>
+                            <tr>
+                                <th>Agent</th>
+                                <th>Fonction</th>
+                                <th>Service</th>
+                                <th>Site</th>
+                                <th>Contact</th>
+                                <th>Statut</th>
+                            </tr>
+                        </thead>
+                        <tbody id="agents-table-body"></tbody>
+                    </table>
+                </div>
+                <div class="pagination-container">
+                    <div class="text-muted small">
+                        Affichage de <span id="showing-from">1</span> à <span id="showing-to">10</span> sur <span id="total-agents">0</span>
+                    </div>
+                    <nav>
+                        <ul class="pagination pagination-sm m-0" id="pagination"></ul>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Vue Cartes -->
+            <div id="cards-view" style="display:none;"></div>
+
+            <!-- Vue Carte -->
+            <div id="map-view" style="display:none;">
+                <div id="leaflet-map"></div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Panneau latéral droit -->
+    <aside class="right-panel" id="right-panel">
+        <div class="detail-panel" id="detail-panel">
+            <div id="empty-state" class="empty-state">
+                <svg xmlns="http://www.w3.org/2000/svg" class="empty-state-icon" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none">
+                    <path d="M10 13a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"/>
+                    <path d="M8 21v-1a2 2 0 0 1 2 -2h4a2 2 0 0 1 2 2v1"/>
+                    <path d="M3 5a2 2 0 0 0 2 2h4a2 2 0 0 0 2 -2v-6a2 2 0 0 0 -2 -2h-4a2 2 0 0 0 -2 2v6"/>
+                    <path d="M15 5a2 2 0 0 0 2 2h4a2 2 0 0 0 2 -2v-6a2 2 0 0 0 -2 -2h-4a2 2 0 0 0 -2 2v6"/>
+                </svg>
+                <h5>Sélectionnez un élément</h5>
+                <p class="text-muted">Cliquez sur un agent, service ou site</p>
+            </div>
+            <div id="detail-content" style="display:none;"></div>
+        </div>
+    </aside>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta20/dist/js/tabler.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.16/jstree.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<!-- Données mockées -->
+<script src="data/mock-data.js"></script>
+
+<!-- Application principale -->
+<script src="js/app.js"></script>
+</body>
+</html>
