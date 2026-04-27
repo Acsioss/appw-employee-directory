@@ -31,14 +31,14 @@
             Annuaire des Agents
         </a>
         <div class="col-md-6 mx-auto">
-            <div class="input-group">
+            <div class="input-group" style="min-width: 400px;">
                 <span class="input-group-text bg-transparent">
                     <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none">
                         <path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"/>
                         <path d="M21 21l-6 -6"/>
                     </svg>
                 </span>
-                <input type="text" id="global-search" class="form-control" placeholder="Rechercher un agent, un site, une entité...">
+                <select id="global-search" class="form-select" style="width: 100%;" data-placeholder="Rechercher un agent, un site, une entité..."></select>
             </div>
         </div>
         <button class="navbar-toggler d-md-none ms-2" type="button" data-bs-toggle="collapse" data-bs-target="#mobile-menu">
@@ -76,20 +76,30 @@
     <!-- Panneau latéral gauche -->
     <aside class="left-panel" id="left-panel">
         <div class="tree-container">
-            <div class="tree-header">
-                <h6 class="mb-0">Entités Organisationnelles</h6>
-                <span class="badge bg-blue-lt" id="entity-count">0</span>
+            <ul class="nav nav-tabs mb-3" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-entities" type="button">
+                        Entités
+                        <span class="badge bg-blue-lt ms-1" id="entity-count">0</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-sites" type="button">
+                        Sites
+                        <span class="badge bg-green-lt ms-1" id="site-count">0</span>
+                    </button>
+                </li>
+            </ul>
+            <div class="tab-content">
+                <div class="tab-pane fade show active" id="tab-entities" role="tabpanel">
+                    <input type="text" class="form-control form-control-sm tree-search mb-2" id="entity-tree-search" placeholder="Rechercher une entité...">
+                    <div id="entity-tree"></div>
+                </div>
+                <div class="tab-pane fade" id="tab-sites" role="tabpanel">
+                    <input type="text" class="form-control form-control-sm tree-search mb-2" id="site-tree-search" placeholder="Rechercher un site...">
+                    <div id="site-tree"></div>
+                </div>
             </div>
-            <input type="text" class="form-control form-control-sm tree-search" id="entity-tree-search" placeholder="Rechercher...">
-            <div id="entity-tree"></div>
-        </div>
-        <div class="tree-container">
-            <div class="tree-header">
-                <h6 class="mb-0">Sites Départementaux</h6>
-                <span class="badge bg-green-lt" id="site-count">0</span>
-            </div>
-            <input type="text" class="form-control form-control-sm tree-search" id="site-tree-search" placeholder="Rechercher...">
-            <div id="site-tree"></div>
         </div>
     </aside>
 
@@ -133,8 +143,8 @@
             </div>
 
             <!-- Vue Tableau -->
-            <div id="table-view">
-                <div class="table-responsive">
+            <div id="table-view" style="display: flex; flex-direction: column; flex: 1;">
+                <div class="table-responsive" style="flex: 1; overflow: auto;">
                     <table class="table table-hover table-vcenter agent-table">
                         <thead>
                             <tr>

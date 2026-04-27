@@ -99,7 +99,7 @@ const treeManager = {
                 'data': treeData,
                 'check_callback': true
             },
-            'plugins': ['types', 'wholerow'],
+            'plugins': ['types', 'wholerow', 'search'],
             'types': {
                 'default': { 'icon': 'ti ti-building' },
                 'direction': { 'icon': 'ti ti-building-skyscraper' },
@@ -157,7 +157,7 @@ const treeManager = {
                 'data': treeData,
                 'check_callback': true
             },
-            'plugins': ['types', 'wholerow'],
+            'plugins': ['types', 'wholerow', 'search'],
             'types': {
                 'domain': { 'icon': 'ti ti-folder' },
                 'site': { 'icon': 'ti ti-map-pin' }
@@ -201,10 +201,13 @@ const treeManager = {
     setupTreeSearch(treeId, searchInputId) {
         $(`#${searchInputId}`).on('input', function() {
             const searchValue = $(this).val();
+            const treeInstance = $(`#${treeId}`).jstree(true);
+            if (!treeInstance) return;
+            
             if (searchValue.length >= 2) {
-                $(`#${treeId}`).jstree(true).search(searchValue);
+                treeInstance.search(searchValue);
             } else {
-                $(`#${treeId}`).jstree(true).clear_search();
+                treeInstance.clear_search();
             }
         });
     }
@@ -543,8 +546,13 @@ const centerPanel = {
             $('#cards-view').toggle(view === 'cards');
             $('#map-view').toggle(view === 'map');
             
-            if (view === 'map' && appState.map) {
-                setTimeout(() => appState.map.invalidateSize(), 100);
+            // Invalidate map size when switching to map view
+            if (view === 'map') {
+                setTimeout(() => {
+                    if (appState.map) {
+                        appState.map.invalidateSize();
+                    }
+                }, 200);
             }
         });
     }
@@ -866,34 +874,112 @@ function exportData(format) {
     }
 }
 
-// Recherche globale
+// Recherche globale avec autocompletion
 function setupGlobalSearch() {
-    let searchTimeout;
-    $('#global-search').on('input', function() {
-        clearTimeout(searchTimeout);
-        const query = $(this).val().toLowerCase();
+    // Fonction pour obtenir toutes les suggestions
+    function getSearchSuggestions() {
+        const suggestions = {
+            agents: [],
+            entities: [],
+            sites: []
+        };
         
-        if (query.length < 2) {
-            centerPanel.renderAgents(data.agents);
-            return;
+        // Agents
+        data.agents.forEach(a => {
+            suggestions.agents.push({
+                id: `agent_${a.UTI_MATRICULERH}`,
+                type: 'agent',
+                text: `${a.UTI_CIVILITE} ${a.UTI_NOM} ${a.UTI_PRENOM}`,
+                subtext: a.UTI_FONCTION,
+                icon: 'user'
+            });
+        });
+        
+        // Entités
+        data.entites.forEach(e => {
+            suggestions.entities.push({
+                id: `entity_${e.ENT_CODERH}`,
+                type: 'entity',
+                text: e.ENT_NOM,
+                subtext: e.ENT_NOM_COURT,
+                icon: 'building'
+            });
+        });
+        
+        // Sites
+        data.lieux.forEach(l => {
+            suggestions.sites.push({
+                id: `site_${l.LIE_CODE}`,
+                type: 'site',
+                text: l.LIE_NOM,
+                subtext: l.LIE_DOMAINE,
+                icon: 'map-pin'
+            });
+        });
+        
+        return suggestions;
+    }
+    
+    const allSuggestions = getSearchSuggestions();
+    
+    // Build flat data array for Select2
+    const select2Data = [
+        ...allSuggestions.agents.map(s => ({ 
+            id: s.id, 
+            text: s.text + ' - ' + s.subtext,
+            title: s.text,
+            subtitle: s.subtext,
+            category: 'Agent'
+        })),
+        ...allSuggestions.entities.map(s => ({ 
+            id: s.id, 
+            text: s.text + ' (' + s.subtext + ')',
+            title: s.text,
+            subtitle: s.subtext,
+            category: 'Entité'
+        })),
+        ...allSuggestions.sites.map(s => ({ 
+            id: s.id, 
+            text: s.text + ' - ' + s.subtext,
+            title: s.text,
+            subtitle: s.subtext,
+            category: 'Site'
+        }))
+    ];
+    
+    // Initialiser Select2 pour la recherche globale
+    $('#global-search').select2({
+        placeholder: 'Rechercher un agent, un site, une entité...',
+        allowClear: true,
+        dropdownParent: $('body'),
+        data: select2Data,
+        templateResult: function(item) {
+            if (!item.id) return item.text;
+            return $('<div class="d-flex flex-column">' +
+                '<span class="fw-medium">' + (item.title || item.text) + '</span>' +
+                '<small class="text-muted">' + (item.subtitle || '') + '</small>' +
+                '</div>');
+        },
+        templateSelection: function(item) {
+            if (!item.id) return item.text;
+            return item.title || item.text;
+        }
+    }).on('select2:select', function(e) {
+        const selectedId = e.params.data.id;
+        const [type, code] = selectedId.split('_');
+        
+        if (type === 'agent') {
+            detailPanel.showAgent(code);
+        } else if (type === 'entity') {
+            detailPanel.showEntity(code);
+            centerPanel.renderAgents(utils.getAgentsByEntity(code));
+        } else if (type === 'site') {
+            detailPanel.showSite(code);
+            centerPanel.renderAgents(utils.getAgentsBySite(code));
         }
         
-        searchTimeout = setTimeout(() => {
-            const filtered = data.agents.filter(a => {
-                const entity = utils.getEntityByCode(a.UTI_CODERH);
-                const lieu = entity ? utils.getLieuByCode(entity.ENT_SITE) : null;
-                
-                return a.UTI_NOM.toLowerCase().includes(query) ||
-                       a.UTI_PRENOM.toLowerCase().includes(query) ||
-                       a.UTI_FONCTION.toLowerCase().includes(query) ||
-                       a.UTI_EMAIL.toLowerCase().includes(query) ||
-                       (entity && entity.ENT_NOM.toLowerCase().includes(query)) ||
-                       (lieu && lieu.LIE_NOM.toLowerCase().includes(query)) ||
-                       (a.UTI_GROUPES && a.UTI_GROUPES.some(g => g.toLowerCase().includes(query)));
-            });
-            
-            centerPanel.renderAgents(filtered);
-        }, 300);
+        // Reset search
+        $('#global-search').val(null).trigger('change');
     });
 }
 

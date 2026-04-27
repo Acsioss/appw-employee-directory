@@ -27,7 +27,18 @@ body {
     border: 1px solid var(--tblr-border-color);
     border-radius: var(--tblr-border-radius);
     padding: 1rem;
-    max-height: 50vh;
+    max-height: calc(100vh - 120px);
+    overflow-y: auto;
+}
+
+.tree-container .tab-content {
+    max-height: calc(100vh - 200px);
+    overflow-y: auto;
+}
+
+#entity-tree, #site-tree {
+    min-height: 200px;
+    max-height: calc(100vh - 250px);
     overflow-y: auto;
 }
 
@@ -79,7 +90,25 @@ body {
     border-radius: var(--tblr-border-radius);
     padding: 1.5rem;
     flex: 1;
-    min-height: 600px;
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100vh - 180px);
+}
+
+#table-view, #cards-view, #map-view {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+#map-view, #leaflet-map {
+    min-height: calc(100vh - 250px);
+    height: calc(100vh - 250px);
+}
+
+.map-view {
+    height: 100%;
+    flex: 1;
 }
 
 .agent-table th {
@@ -87,6 +116,15 @@ body {
     text-transform: uppercase;
     font-size: 0.75rem;
     color: var(--tblr-muted);
+    position: sticky;
+    top: 0;
+    background: var(--tblr-body-bg);
+    z-index: 1;
+}
+
+.table-responsive {
+    overflow-y: auto;
+    flex: 1;
 }
 
 .clickable-row {
@@ -101,11 +139,29 @@ body {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 1.5rem;
+    flex: 1;
+}
+
+#cards-view {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+    flex: 1;
+    overflow-y: auto;
 }
 
 .agent-card {
     cursor: pointer;
     transition: transform 0.2s, box-shadow 0.2s;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.agent-card .card-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
 }
 
 .agent-card:hover {
@@ -114,7 +170,8 @@ body {
 }
 
 .map-view {
-    height: 600px;
+    height: 100%;
+    flex: 1;
 }
 
 #leaflet-map {
@@ -299,6 +356,21 @@ body {
 }
 
 /* Select2 custom styles */
+.select2-container--default .select2-selection--single {
+    border-color: var(--tblr-border-color);
+    background-color: var(--tblr-body-bg);
+    height: 38px;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    color: var(--tblr-body-color);
+    line-height: 36px;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 36px;
+}
+
 .select2-container--default .select2-selection--multiple {
     border-color: var(--tblr-border-color);
     background-color: var(--tblr-body-bg);
@@ -325,10 +397,15 @@ body {
 
 .select2-results__option {
     color: var(--tblr-body-color);
+    padding: 6px 12px;
 }
 
 .select2-results__option--highlighted[aria-selected] {
     background-color: var(--tblr-primary);
+}
+
+.select2-container--open .select2-dropdown {
+    z-index: 9999;
 }
 
 /* Leaflet popup styles */

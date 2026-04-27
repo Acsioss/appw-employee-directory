@@ -1,46 +1,427 @@
 ```
+# Compiled and build artifacts
+*.pyc
+__pycache__/
+*.o
+*.obj
+*.class
+*.exe
+*.dll
+*.so
+*.a
+*.out
+
 # Dependencies
 node_modules/
-
-# Build artifacts
-dist/
-build/
-target/
-
-# Python
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-*.py.class
-*.py.backup
-
-# Logs
-*.log
-
-# Environment
+venv/
+.venv/
 .env
 .env.local
 .env.*
 
-# Editor/IDE
-.vscode/
-.idea/
+# Logs and temp files
+*.log
+*.tmp
 *.swp
 *.swo
-*.tmp
 
-# OS
-.DS_Store
-Thumbs.db
+# Build directories
+dist/
+build/
+target/
+*.jar
+*.war
+*.zip
+*.gz
+*.tar
+*.tgz
+*.bz2
+*.xz
+*.7z
+*.rar
+*.zst
+*.lz4
+*.lzh
+*.cab
+*.arj
+*.rpm
+*.deb
+*.Z
+*.lz
+*.lzo
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.tar.zst
 
-# Coverage
+# Coverage reports
 coverage/
 htmlcov/
 .coverage
 
-# Cache
+# IDE specific
+.vscode/
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# OS specific
+.DS_Store
+Thumbs.db
+
+# Python specific
+*.pyo
+*.pyd
+*.egg-info/
+.eggs/
 .mypy_cache/
 .pytest_cache/
+.tox/
+.coverage*
+
+# JavaScript/Node specific
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.jest/
+.nyc_output/
+
+# Java specific
 .gradle/
+build/
+*.class
+*.jar
+*.war
+*.ear
+hs_err_pid*
+
+# C/C++ specific
+*.o
+*.obj
+*.a
+*.lib
+*.so
+*.dylib
+*.dll
+*.exe
+
+# Go specific
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Ruby specific
+*.gem
+*.rbc
+.bundle/
+vendor/bundle/
+.rbenv-gemsets
+.rbenv-version
+
+# Rust specific
+target/
+*.rs.bk
+Cargo.lock
+
+# PHP specific
+vendor/
+composer.phar
+*.phar
+
+# .NET specific
+bin/
+obj/
+*.sln
+*.csproj.user
+*.userosscache
+*.suo
+
+# Android specific
+*.apk
+*.ap_
+local.properties
+.settings/
+.externalToolBuilders/
+.gradle/
+build/
+captures/
+
+# iOS specific
+*.ipa
+*.app
+*.mobileprovision
+
+# Julia specific
+julia-*/
+
+# Zig specific
+zig*/
+
+# Temporary files
+*.tmp
+*.temp
+*~
+.#*
+.DS_Store
+ehthumbs.db
+Icon?
+Thumbs.db
+desktop.ini
+
+# Environment variables
+.env
+.env.local
+.env.*
+!.env.example
+
+# Cache directories
+.cache/
+*.cache
+*.cached
+
+# Lock files
+package-lock.json
+composer.lock
+Gemfile.lock
+Pipfile.lock
+poetry.lock
+Cargo.lock
+
+# Database
+*.db
+*.db-journal
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# Log files
+*.log
+!*.keep
+
+# Test coverage
+coverage.xml
+*.gcov
+*.lcov
+*.profdata
+
+# Vim swap files
+*.swp
+*.swo
+*.swn
+
+# Emacs backup files
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+
+# Sublime Text
+*.sublime-workspace
+.swo
+.swp
+
+# Atom
+.atom/
+
+# WebStorm
+.webstorm/
+
+# Eclipse
+.metadata
+bin/
+tmp/
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
+.settings/
+.loadpath
+.recommenders
+
+# Visual Studio Code
+.vscode/
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+*.jar
+*.war
+*.ear
+*.class
+*.launch
+.recommenders
+
+# NetBeans
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+# Code::Blocks
+*.depend
+*.layout
+*.cbp
+
+# Dev-C++
+*.dev
+
+# Qt Creator
+*.pro.user
+*.pro.user.*
+*.qbs.user
+*.qbs.user.*
+*.moc
+*.moc.cpp
+*.qm
+*.prl
+*.pri
+
+# CLion
+cmake-build-*/
+CMakeFiles/
+CMakeCache.txt
+compile_commands.json
+
+# Android Studio
+*.iml
+*.ipr
+*.iws
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.VC.db
+*.VC.VC.opendb
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+x64/
+x86/
+build/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]ogs/
+[Tt]emp/
+[Tt]emporary[Tt]est[Tt]ransactions/
+*.ilk
+*.meta
+*.pidb
+*.svclog
+*.sdf
+*.opendb
+*.userprefs
+*.cache
+*.vspscc
+*.vssscc
+*.dox
+*.VC.VC.opendb
+*.VC.db
+*.opensdf
+*.sdf
+*.cachefile
+*.VC.opendb
+*.VC.db
+*.VC.VC.opendb
+*.VC.db
+*.VC.VC.opendb
+*.VC.db
+*.VC.VC.opendb
+*.VC.db
+*.VC.VC.opendb
+*.VC.db
+*.VC.VC.opendb
+*.VC.db
+*.VC.VC.opendb
+*.VC.db
+*.VC.VC.opendb
+*.VC.db
+*.VC.VC.opendb
+*.VC.db
+*.VC.VC.opendb
+*.VC.db
+*.VC.VC.opendb
+*.VC.db
+*.VC.VC.opendb
+*.VC.db
+*.VC.VC.opendb
+*.VC.db
+*.VC.VC.opendb
+*.VC.db
+*.VC.VC.opendb
+*.VC.db
+*.VC.VC.opendb
+*.VC.db
+*.VC.VC.opendb
+*.VC.db
+*.VC.VC.opendb
+*.VC.db
+*.VC.VC.opendb
+*.VC.db
+*.VC.VC.opendb
+*.VC.db
+*.VC.VC.opendb
+*.VC.db
+*.VC.VC.opendb
+*.VC.db
+*.VC.VC.opendb
+*.VC.db
+*.VC.VC.opendb
+*.VC.db
+*.VC.VC.opendb
+*.VC.db
+*.VC.VC.opendb
+*.VC.db
+*.VC.VC.opendb
+*.VC.db
+*.VC.VC.opendb
+*.VC.db
+*.VC.VC.opendb
+*.VC.db
+*.VC.VC.opendb
+*.VC.db
+*.VC.VC.opendb
+*.VC.db
+*.VC.VC.opendb
+*.VC.db
+*.VC.VC.opendb
+*.VC.db
+*.VC.VC.opendb
+*.VC.db
+*.VC.VC.opendb
+*.VC.db
+*.VC.VC.opendb
+*.VC.db
+*.VC.VC.opendb
+*.VC.db
+*.VC.VC.opendb
+*.VC.db
+*.VC.VC.opendb
+*.VC.db
+*.VC.VC.opendb
+*.VC.db
+*.VC.VC.opendb
+*.VC.db
+*.VC.VC.opendb
+*.VC.db
+*.VC.VC.opendb
+*.VC.db
+*.VC.VC.opendb
+*.VC.db
+*.VC.VC.opendb
+*.VC.db
+*.VC.VC.opendb
+*.VC.db
+*.VC.VC.opendb
+*.VC.db
+......
 ```
