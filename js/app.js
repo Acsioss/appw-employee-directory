@@ -109,7 +109,7 @@ const treeManager = {
         
         $('#entity-tree').on('select_node.jstree', (e, data) => {
             const node = data.node;
-            if (node.original.entityType === 'entity') {
+            if (node.original && node.original.entityType === 'entity') {
                 appState.selectedEntity = node.original.code;
                 appState.selectedSite = null;
                 detailPanel.showEntity(node.original.code);
@@ -166,7 +166,7 @@ const treeManager = {
         
         $('#site-tree').on('select_node.jstree', (e, data) => {
             const node = data.node;
-            if (node.original?.entityType === 'site') {
+            if (node.original && node.original.entityType === 'site') {
                 appState.selectedSite = node.original.code;
                 appState.selectedEntity = null;
                 detailPanel.showSite(node.original.code);
@@ -207,7 +207,18 @@ const treeManager = {
             if (searchValue.length >= 2) {
                 treeInstance.search(searchValue);
             } else {
+                // Utiliser la méthode correcte pour clear_search
                 treeInstance.clear_search();
+            }
+        });
+        
+        // Gérer les événements de recherche jsTree
+        $(`#${treeId}`).on('search.jstree', function(e, data) {
+            // Ouvrir tous les noeuds trouvés
+            if (data.nodes && data.nodes.length > 0) {
+                data.nodes.forEach(node => {
+                    $(`#${treeId}`).jstree(true).open_node(node);
+                });
             }
         });
     }
@@ -220,7 +231,8 @@ const centerPanel = {
         $('#filter-functions').select2({
             placeholder: 'Fonctions',
             allowClear: true,
-            width: '200px',
+            width: '100%',
+            dropdownParent: $('.content-header'),
             data: utils.getAllUniqueFunctions().map(f => ({ id: f, text: f }))
         });
         
@@ -228,7 +240,8 @@ const centerPanel = {
         $('#filter-groups').select2({
             placeholder: 'Groupes',
             allowClear: true,
-            width: '200px',
+            width: '100%',
+            dropdownParent: $('.content-header'),
             data: utils.getAllUniqueGroups().map(g => ({ id: g, text: g }))
         });
         
@@ -236,7 +249,8 @@ const centerPanel = {
         $('#filter-locations').select2({
             placeholder: 'Localisations',
             allowClear: true,
-            width: '200px',
+            width: '100%',
+            dropdownParent: $('.content-header'),
             data: data.lieux.map(l => ({ id: l.LIE_CODE, text: l.LIE_NOM }))
         });
         
@@ -422,16 +436,34 @@ const centerPanel = {
     
     renderMap(agents) {
         if (!appState.map) {
-            appState.map = L.map('leaflet-map').setView([46.58, 0.34], 11);
+            appState.map = L.map('leaflet-map', {
+                zoomControl: true,
+                preferCanvas: true
+            }).setView([46.58, 0.34], 11);
             
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '© OpenStreetMap contributors'
             }).addTo(appState.map);
         }
         
+        // Invalidate map size to ensure proper rendering
+        setTimeout(() => {
+            if (appState.map) {
+                appState.map.invalidateSize();
+            }
+        }, 100);
+        
         // Clear existing markers
         appState.mapMarkers.forEach(marker => appState.map.removeLayer(marker));
         appState.mapMarkers = [];
+        
+        // Domain color mapping for markers
+        const domainColors = {
+            'Central': '#206bc4',    // blue
+            'Social': '#e64980',     // pink
+            'Routes': '#f76707',     // orange
+            'Education': '#2fb344'   // green
+        };
         
         // Group agents by location
         const agentsByLocation = {};
@@ -445,17 +477,34 @@ const centerPanel = {
             }
         });
         
-        // Add markers for each location
+        // Add markers for each location with domain-specific colors
         Object.keys(agentsByLocation).forEach(siteCode => {
             const lieu = utils.getLieuByCode(siteCode);
             if (lieu) {
                 const agentList = agentsByLocation[siteCode];
+                const domainColor = domainColors[lieu.LIE_DOMAINE] || '#206bc4';
                 
-                const marker = L.marker([lieu.LIE_LATITUDE, lieu.LIE_LONGITUDE])
+                // Create custom colored marker
+                const markerIcon = L.divIcon({
+                    className: 'custom-marker',
+                    html: `<div style="
+                        background-color: ${domainColor};
+                        width: 24px;
+                        height: 24px;
+                        border-radius: 50%;
+                        border: 3px solid white;
+                        box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+                    "></div>`,
+                    iconSize: [24, 24],
+                    iconAnchor: [12, 12]
+                });
+                
+                const marker = L.marker([lieu.LIE_LATITUDE, lieu.LIE_LONGITUDE], { icon: markerIcon })
                     .bindPopup(`
                         <div>
-                            <strong>${lieu.LIE_NOM}</strong><br>
-                            <small>${agentList.length} agent(s)</small><br>
+                            <strong style="color: ${domainColor};">${lieu.LIE_NOM}</strong><br>
+                            <small>${lieu.LIE_DOMAINE}</small><br>
+                            <span class="badge bg-blue mt-1">${agentList.length} agent(s)</span><br>
                             <button class="btn btn-sm btn-primary mt-2" onclick="detailPanel.showSite('${lieu.LIE_CODE}')">Voir détails</button>
                         </div>
                     `);
@@ -947,18 +996,29 @@ function setupGlobalSearch() {
         }))
     ];
     
-    // Initialiser Select2 pour la recherche globale
+    // Initialiser Select2 pour la recherche globale avec autocompletion
     $('#global-search').select2({
         placeholder: 'Rechercher un agent, un site, une entité...',
         allowClear: true,
         dropdownParent: $('body'),
         data: select2Data,
+        minimumInputLength: 1,
         templateResult: function(item) {
             if (!item.id) return item.text;
-            return $('<div class="d-flex flex-column">' +
+            let icon = 'user';
+            if (item.category === 'Entité') icon = 'building';
+            if (item.category === 'Site') icon = 'map-pin';
+            
+            return $('<div class="d-flex align-items-center gap-2 py-1">' +
+                '<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"><path d="' + 
+                (icon === 'user' ? 'M9 7m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0 M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2' : 
+                 icon === 'building' ? 'M5 21v-16a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v16l-3 -2l-2 2l-2 -2l-2 2l-2 -2z' : 
+                 'M9 11a3 3 0 1 0 6 0a3 3 0 0 0 -6 0 M17.657 16.657l-4.243 4.243a2 2 0 0 1 -2.828 0l-4.244 -4.243a8 8 0 1 1 11.314 0z') + 
+                '"/></svg>' +
+                '<div class="d-flex flex-column">' +
                 '<span class="fw-medium">' + (item.title || item.text) + '</span>' +
                 '<small class="text-muted">' + (item.subtitle || '') + '</small>' +
-                '</div>');
+                '</div></div>');
         },
         templateSelection: function(item) {
             if (!item.id) return item.text;
